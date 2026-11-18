@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install Dioxus CLI
+        run: cargo install dioxus-cli --version 0.7.3
+
+      - name: Install wasm-opt (for smaller builds)
+        run: cargo install wasm-opt --version 0.116.0
+
+      - name: Build Web (WASM) for GitHub Pages
+        run: |
+          # Build with base_path set to the repository name
+          dx bundle --platform web --release \
+            --config web.base_path=/matching-game-gen/ \
+            --config web.out_dir=docs
+
+      - name: Verify build output
+        run: |
+          ls -la docs/
+          test -f docs/index.html
+          test -f docs/public/wasm32-unknown-unknown/release/*.wasm
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

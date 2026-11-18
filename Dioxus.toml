@@ -3,6 +3,10 @@ name = "my_dioxus_app"
 asset_dir = "assets"
 bundle_id = "com.my_dioxus_app.matching-game"
 
+[web.app]
+title = "Matching Game"
+base_path = "matching"
+
 [web.resource]
 style = []
 script = []

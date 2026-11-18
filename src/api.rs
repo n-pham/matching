@@ -68,26 +68,23 @@ pub fn shuffle_cards_logic() -> Vec<Card> {
     cards
 }
 
-#[server]
-pub async fn get_high_scores() -> Result<Vec<HighScore>, ServerFnError> {
-    #[cfg(feature = "server")]
-    {
+// Server-only functions - only compiled when "server" feature is enabled
+#[cfg(feature = "server")]
+mod server_api {
+    use super::*;
+    use dioxus::prelude::*;
+
+    #[server]
+    pub async fn get_high_scores() -> Result<Vec<HighScore>, ServerFnError> {
         use crate::server::get_data;
         let data = get_data().lock().map_err(|e| ServerFnError::new(format!("Mutex lock error: {}", e)))?;
         let mut scores = data.clone();
         scores.sort_by(|a, b| b.score.cmp(&a.score));
         Ok(scores.into_iter().take(10).collect())
     }
-    #[cfg(not(feature = "server"))]
-    {
-        unreachable!()
-    }
-}
 
-#[server]
-pub async fn submit_score(player_name: String, score: i32, time_seconds: i32) -> Result<(), ServerFnError> {
-    #[cfg(feature = "server")]
-    {
+    #[server]
+    pub async fn submit_score(player_name: String, score: i32, time_seconds: i32) -> Result<(), ServerFnError> {
         use crate::server::get_data;
         let mut data = get_data().lock().map_err(|e| ServerFnError::new(format!("Mutex lock error: {}", e)))?;
         let next_id = data.iter().map(|s| s.id).max().unwrap_or(0) + 1;
@@ -99,16 +96,16 @@ pub async fn submit_score(player_name: String, score: i32, time_seconds: i32) ->
         });
         Ok(())
     }
-    #[cfg(not(feature = "server"))]
-    {
-        unreachable!()
+
+    #[server]
+    pub async fn get_shuffled_cards() -> Result<Vec<Card>, ServerFnError> {
+        Ok(shuffle_cards_logic())
     }
 }
 
-#[server]
-pub async fn get_shuffled_cards() -> Result<Vec<Card>, ServerFnError> {
-    Ok(shuffle_cards_logic())
-}
+// Re-export server functions when server feature is enabled
+#[cfg(feature = "server")]
+pub use server_api::*;
 
 #[cfg(test)]
 mod tests {

@@ -5,9 +5,12 @@ edition = "2021"
 
 [dependencies]
 # The Core UI Framework (2026 Stable)
-dioxus = { version = "0.7.3", features = ["fullstack", "router"] }
-dioxus-fullstack = "0.7.3"
-dioxus-server = "0.7.3"
+# Use default features which includes 'lib' (core: macro, signals, hooks, html)
+# For web: add 'web' feature
+# For server: add 'fullstack' feature (pulls in server deps)
+dioxus = { version = "0.7.3", features = ["router", "web"] }
+dioxus-fullstack = { version = "0.7.3", optional = true }
+dioxus-server = { version = "0.7.3", optional = true }
 
 # Data Serialization (Crucial for Server Functions)
 serde = { version = "1.0", features = ["derive"] }
@@ -30,20 +33,24 @@ sqlx = { version = "0.8", features = [
 # Shared Utilities
 tracing = "0.1"
 log = "0.4"
-rand = "0.8"
+rand = { version = "0.8", features = ["getrandom"] }
+getrandom = { version = "0.2", features = ["js"] }
 futures-timer = "3.0"
 
 [features]
 default = ["web"]
 # The 'web' feature: Compiled for the browser (Wasm)
-web = ["dioxus/web"]
+web = []
 # The 'desktop' feature: Compiled for a native window
 desktop = ["dioxus/desktop"]
 # The 'server' feature: Compiled for the binary (Axum + SQLx)
 server = [
     "dep:axum",
     "dep:tokio",
-    "dep:sqlx"
+    "dep:sqlx",
+    "dioxus/fullstack",
+    "dioxus-fullstack",
+    "dioxus-server"
 ]
 
 [dev-dependencies]
