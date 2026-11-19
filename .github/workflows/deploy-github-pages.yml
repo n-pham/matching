@@ -21,19 +21,49 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
+          cache: true
+
+      - name: Cache cargo install (dioxus-cli, wasm-opt)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/dioxus-cli
+            ~/.cargo/bin/wasm-opt
+          key: cargo-install-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
 
       - name: Install Dioxus CLI
-        run: cargo install dioxus-cli --version 0.7.3
+        run: |
+          if ! command -v dioxus-cli &> /dev/null; then
+            cargo install dioxus-cli --version 0.7.3
+          else
+            echo "dioxus-cli already installed"
+          fi
 
       - name: Install wasm-opt (for smaller builds)
-        run: cargo install wasm-opt --version 0.116.0
+        run: |
+          if ! command -v wasm-opt &> /dev/null; then
+            cargo install wasm-opt --version 0.116.0
+          else
+            echo "wasm-opt already installed"
+          fi
+
+      - name: Configure Dioxus for GitHub Pages
+        run: |
+          # Update base_path for GitHub Pages deployment
+          sed -i 's|base_path = "matching"|base_path = "/matching-game-gen/"|' Dioxus.toml
+          # Ensure output directory is set to docs (add under [web] section)
+          if ! grep -q 'out_dir' Dioxus.toml; then
+            # Add [web] section with out_dir before [web.app] if [web] doesn't exist
+            if ! grep -q '^\[web\]$' Dioxus.toml; then
+              sed -i '/^\[web\.app\]/i [web]\nout_dir = "docs"\n' Dioxus.toml
+            else
+              sed -i '/^\[web\]$/a out_dir = "docs"' Dioxus.toml
+            fi
+          fi
+          cat Dioxus.toml
 
       - name: Build Web (WASM) for GitHub Pages
-        run: |
-          # Build with base_path set to the repository name
-          dx bundle --platform web --release \
-            --config web.base_path=/matching-game-gen/ \
-            --config web.out_dir=docs
+        run: dx bundle --platform web --release
 
       - name: Verify build output
         run: |
