@@ -9,6 +9,7 @@ base_path = "/matching-game-gen/"
 out_dir = "docs"
 
 [web.resource]
+dev = { style = [], script = [] }
 style = []
 script = []
 
