@@ -1,0 +1,20 @@
+[application]
+name = "my_dioxus_app"
+asset_dir = "assets"
+bundle_id = "com.my_dioxus_app.matching-game"
+
+[web.app]
+title = "Matching Game"
+base_path = "/matching-game-gen/"
+out_dir = "docs"
+
+[web.resource]
+style = []
+script = []
+
+[web.watcher]
+watch_path = ["src", "assets"]
+
+[hot_reload]
+watch_path = ["src"]
+template_dir = "src"

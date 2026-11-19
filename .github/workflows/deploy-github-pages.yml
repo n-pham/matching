@@ -47,27 +47,8 @@ jobs:
             echo "wasm-opt already installed"
           fi
 
-      - name: Configure Dioxus for GitHub Pages
-        run: |
-          python3 -c "
-import re
-with open('Dioxus.toml', 'r') as f:
-    content = f.read()
-
-# Replace base_path for GitHub Pages
-content = content.replace('base_path = \"matching\"', 'base_path = \"/matching-game-gen/\"')
-
-# Add out_dir under [web.app] after base_path
-if 'out_dir' not in content:
-    content = re.sub(r'(base_path = \"/matching-game-gen/\")', r'\1\nout_dir = \"docs\"', content)
-
-with open('Dioxus.toml', 'w') as f:
-    f.write(content)
-
-print('Modified Dioxus.toml:')
-print(content)
-"
-          cat Dioxus.toml
+      - name: Use GitHub Pages config
+        run: cp Dioxus.github.toml Dioxus.toml
 
       - name: Build Web (WASM) for GitHub Pages
         run: dx bundle --platform web --release
