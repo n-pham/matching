@@ -51,14 +51,9 @@ jobs:
         run: |
           # Update base_path for GitHub Pages deployment
           sed -i 's|base_path = "matching"|base_path = "/matching-game-gen/"|' Dioxus.toml
-          # Ensure output directory is set to docs (add under [web] section)
+          # Add out_dir under [web.app] section (where base_path lives)
           if ! grep -q 'out_dir' Dioxus.toml; then
-            # Add [web] section with out_dir before [web.app] if [web] doesn't exist
-            if ! grep -q '^\[web\]$' Dioxus.toml; then
-              sed -i '/^\[web\.app\]/i [web]\nout_dir = "docs"\n' Dioxus.toml
-            else
-              sed -i '/^\[web\]$/a out_dir = "docs"' Dioxus.toml
-            fi
+            sed -i '/^base_path =/a out_dir = "docs"' Dioxus.toml
           fi
           cat Dioxus.toml
 
