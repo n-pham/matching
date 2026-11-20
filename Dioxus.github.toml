@@ -5,8 +5,7 @@ bundle_id = "com.my_dioxus_app.matching-game"
 
 [web.app]
 title = "Matching Game"
-base_path = "/matching-game-gen/"
-out_dir = "docs"
+base_path = "matching"
 
 [web.resource]
 dev = { style = [], script = [] }

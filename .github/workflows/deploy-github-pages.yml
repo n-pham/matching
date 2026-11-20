@@ -53,6 +53,11 @@ jobs:
       - name: Build Web (WASM) for GitHub Pages
         run: dx bundle --platform web --release
 
+      - name: Copy build output to docs/
+        run: |
+          mkdir -p docs
+          cp -r target/dx/my_dioxus_app/release/web/public/* docs/
+
       - name: Verify build output
         run: |
           ls -la docs/
