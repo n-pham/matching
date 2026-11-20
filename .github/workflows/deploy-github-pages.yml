@@ -62,7 +62,7 @@ jobs:
         run: |
           ls -la docs/
           test -f docs/index.html
-          test -f docs/public/wasm32-unknown-unknown/release/*.wasm
+          test -n "$(find docs/assets -maxdepth 1 -name '*.wasm' -print -quit)"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
